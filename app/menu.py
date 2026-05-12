@@ -4,23 +4,29 @@ from sys import exit
 from app.installer import Installer
 from app.runner import Runner
 
+CHALLENGE_IDS = ['ctfd', '1', '2', '3', '4', '5', '6', '7', '8']
 
-def handle_args(inputs):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--install', help="Install", action="store_true")
-    parser.add_argument('-r', '--run', help="Start CTFd or a Challenge.", choices=['ctfd', '1', '2', '3'])
-    args = parser.parse_args(inputs)
-    return args
+challenge_list = """
+Challenge List:
+  1  Basic Prompt Injection
+  2  Title Requestor (SSRF)
+  3  Output Filter Bypass
+  4  System Prompt Extraction
+  5  Multi-Turn Escalation
+  6  Agentic Tool Abuse (SQLi via LLM)
+  7  Indirect Injection via RAG
+  8  Custom Encoding Bypass
+        """
 
-def banner():
-    title = """                                               
-                                                                    
+def banner() -> None:
+    title = """
+        
         _))
         > *\     _~
         `;'\\__-' \_
     ____  | )  _ \ \\ _____________________
-    ____  / / ``  w w ____________________        
-    ____ w w ________________AI_Goat______                                                                          
+    ____  / / ``  w w ____________________
+    ____ w w ________________AI_Goat______
     ______________________________________
 
     Presented by: rootcauz
@@ -28,21 +34,38 @@ def banner():
     """
     print(title)
 
+def handle_args(inputs: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description = "AI Goat - LLM Security CTF",
+        formatter_class = argparse.RawDescriptionHelpFormatter,
+        epilog = challenge_list
+    )
+    parser.add_argument('-i', '--install', help="Install", action="store_true")
+    parser.add_argument('-r', '--run', help="Start CTFd or a Challenge.", choices=CHALLENGE_IDS)
+    parser.add_argument('-s', '--stop', help="Stop CTFd, a specific challenge, or 'all'.",
+                        choices=['all'] + CHALLENGE_IDS, nargs='?', const='all')
+    parser.add_argument('-l', '--list', help="List running challenges.", action="store_true",
+                        dest='list_running')
+    args = parser.parse_args(inputs)
+    return args
 
-def run(inputs):
+def run(inputs: list[str]) -> None:
     banner()
-    if inputs is not None:
+    if inputs:
         args = handle_args(inputs)
-        if args.install is True:
+        if args.install:
             Installer.install()
+            exit()
+        if args.stop:
+            Runner.stop(args.stop)
+            exit()
+        if args.list_running:
+            Runner.list_running()
             exit()
         if args.run == 'ctfd':
             Runner.ctfd()
             exit()
-        if args.run == '1':
-            Runner.challenge_1()
-            exit()
-        if args.run == '2':
-            Runner.challenge_2()
+        if args.run:
+            Runner.launch_challenge(int(args.run))
             exit()
     handle_args(["--help"])

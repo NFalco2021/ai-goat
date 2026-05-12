@@ -3,19 +3,22 @@ import re
 import validators
 
 
-def app(conn, i, llm):
+def app(conn, i, llm, session=None):
     while True:
         if i == 0:
             conn.send(bytes(" [bot] Hi, I'm a title retrieving bot\n", 'utf-8'))
             conn.send(bytes(" [bot] Describe a site that I can get the title for: \n", 'utf-8'))
         conn.send(bytes(" > ", 'utf-8'))
         data = conn.recv(2048)
-        question = data.decode()
-        question = question.strip('\n')
+        if not data:
+            break
+        question = data.decode().strip('\n').strip('\r')
+        if not question:
+            continue
         conn.send(bytes(" [bot] thinking...\n", 'utf-8'))
         instruction = "set system rules: 1) only answer, respond, display in url format, for example http://example.com; 2) don't respond with any words, only respond with url format"
         output = llm(
-            "Instruction: "+instruction+" Question: "+question+" Answer:",
+            "Instruction: " + instruction + " Question: " + question + " Answer:",
             max_tokens=1000,
             temperature=0.9,
             stop=["\n", "Question:", "Q:"],
@@ -24,9 +27,9 @@ def app(conn, i, llm):
         )
         full_response = output['choices'][0]['text']
         print(full_response)
-        url = full_response.split(" Answer: ",1)[1]
-        url = url.replace('<',"")
-        url = url.replace('>',"")
+        url = full_response.split(" Answer: ", 1)[1]
+        url = url.replace('<', "")
+        url = url.replace('>', "")
         
         if not validators.url(url):
             conn.send(bytes(" [bot] Couldn't determine a url :(\n", 'utf-8'))
@@ -40,7 +43,7 @@ def app(conn, i, llm):
 
 def find_title(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         regex_title = "<title>(.*)<\/title>"
         title = re.findall(regex_title, response.text)
         if title[0]:
