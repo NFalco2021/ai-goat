@@ -1,13 +1,13 @@
-version: '1'
+version: '3'
 
 services:
   ctfd:
     image: rootcauz/ai-ctfd:${AI_CTFD_VERSION}
     ports:
       - "8000:8000"
-      
-  #Basic Prompt Injection
-  challenge1: 
+
+  # Challenge 1: Basic Prompt Injection
+  challenge1:
     container_name: challenge1
     image: rootcauz/ai-base:${AI_BASE_VERSION}
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
@@ -19,7 +19,7 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
 
-  #Title Requestor
+  # Challenge 2: Title Requestor (SSRF)
   challenge2:
     container_name: challenge2
     image: rootcauz/ai-base:${AI_BASE_VERSION}
@@ -32,6 +32,83 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
 
+  # Challenge 3: Output Filter Bypass
+  challenge3:
+    container_name: challenge3
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9003:9003"
+    volumes:
+      - ./app/challenges/3/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/3/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+
+  # Challenge 4: System Prompt Extraction
+  challenge4:
+    container_name: challenge4
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9004:9004"
+    volumes:
+      - ./app/challenges/4/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/4/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+
+  # Challenge 5: Multi-Turn Escalation
+  challenge5:
+    container_name: challenge5
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9005:9005"
+    volumes:
+      - ./app/challenges/5/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/5/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+
+  # Challenge 6: Agentic Tool Abuse (SQLi via LLM)
+  challenge6:
+    container_name: challenge6
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9006:9006"
+    volumes:
+      - ./app/challenges/6/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/6/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+
+  # Challenge 7: Indirect Injection via RAG
+  challenge7:
+    container_name: challenge7
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9007:9007"
+    volumes:
+      - ./app/challenges/7/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/7/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+
+  # Challenge 8: Custom Encoding Bypass
+  challenge8:
+    container_name: challenge8
+    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9008:9008"
+    volumes:
+      - ./app/challenges/8/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/8/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
 
 networks:
   default:
