@@ -1,15 +1,16 @@
-version: '3'
-
 services:
   ctfd:
-    image: rootcauz/ai-ctfd:${AI_CTFD_VERSION}
+    image: ctfd/ctfd:3.8.4
     ports:
       - "8000:8000"
 
   # Challenge 1: Basic Prompt Injection
   challenge1:
     container_name: challenge1
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    build:
+      context: .
+      dockerfile: ai_base_Dockerfile
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9001:9001"
@@ -22,7 +23,7 @@ services:
   # Challenge 2: Title Requestor (SSRF)
   challenge2:
     container_name: challenge2
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9002:9002"
@@ -35,7 +36,7 @@ services:
   # Challenge 3: Output Filter Bypass
   challenge3:
     container_name: challenge3
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9003:9003"
@@ -48,7 +49,7 @@ services:
   # Challenge 4: System Prompt Extraction
   challenge4:
     container_name: challenge4
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9004:9004"
@@ -61,7 +62,7 @@ services:
   # Challenge 5: Multi-Turn Escalation
   challenge5:
     container_name: challenge5
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9005:9005"
@@ -74,7 +75,7 @@ services:
   # Challenge 6: Agentic Tool Abuse (SQLi via LLM)
   challenge6:
     container_name: challenge6
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9006:9006"
@@ -87,7 +88,7 @@ services:
   # Challenge 7: Indirect Injection via RAG
   challenge7:
     container_name: challenge7
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9007:9007"
@@ -100,7 +101,7 @@ services:
   # Challenge 8: Custom Encoding Bypass
   challenge8:
     container_name: challenge8
-    image: rootcauz/ai-base:${AI_BASE_VERSION}
+    image: ai-goat-base
     entrypoint: /usr/bin/bash /challenge/entrypoint.sh
     ports:
       - "9008:9008"
@@ -109,8 +110,3 @@ services:
       - ./app/challenges/8/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
-
-networks:
-  default:
-  internal:
-    internal: true

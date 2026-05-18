@@ -17,7 +17,13 @@ daniel@daniel-desktop:~$ nc 127.0.0.1 9002
  [bot] Title Result: Google
  > localhost port 8080
  [bot] thinking...
- [bot] searching http://localhost:8080/
+ [bot] Couldn't determine a url :(
+ > localhost:8080   
+ [bot] thinking...
+ [bot] Couldn't determine a url :(
+ > 127.0.0.1:8080
+ [bot] thinking...
+ [bot] searching http://127.0.0.1:8080
  [bot] Title Result: {$3rv3r_$!d3_fa!lur3}
  > 
 ```

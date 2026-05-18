@@ -2,6 +2,7 @@ import requests
 import re
 import validators
 
+FLAG = "$3rv3r_$!d3_fa!lur3"
 
 def app(conn, i, llm, session=None):
     while True:
@@ -44,7 +45,7 @@ def app(conn, i, llm, session=None):
 def find_title(url):
     try:
         response = requests.get(url, timeout=5)
-        regex_title = "<title>(.*)<\/title>"
+        regex_title = r"<title>(.*)<\/title>"
         title = re.findall(regex_title, response.text)
         if title[0]:
             return title[0]

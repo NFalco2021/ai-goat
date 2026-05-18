@@ -79,11 +79,27 @@ class Runner:
     @staticmethod
     def ctfd() -> None:
         print("[+] Starting CTFd")
-        Runner.run_command(
+        success = Runner.run_command(
             ['docker', 'compose', 'up', 'ctfd', '-d'],
-            "[+] CTFd Started! Open browser to http://127.0.0.1:8000",
+            "[+] CTFd container started.",
             "[-] CTFd startup failed!"
         )
+        if not success:
+            return
+
+        # Auto-seed against the local CTFd
+        try:
+            from app.ctfd_seed import seed, SeedError
+            seed()
+        except SeedError as e:
+            print(f"[-] Seeding failed: {e}")
+            print("[!] CTFd is running but unseeded. Re-run with: ./ai-goat.py --seed-ctfd")
+            return
+        except Exception as e:
+            print(f"[-] Unexpected error during seeding: {e}")
+            return
+
+        print("[+] Open browser to http://127.0.0.1:8000")
 
     @staticmethod
     def check_llm_status(container_name: str, happy_msg: str, sad_msg: str, timeout: int = 300) -> bool:

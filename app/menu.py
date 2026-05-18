@@ -46,6 +46,12 @@ def handle_args(inputs: list[str]) -> argparse.Namespace:
                         choices=['all'] + CHALLENGE_IDS, nargs='?', const='all')
     parser.add_argument('-l', '--list', help="List running challenges.", action="store_true",
                         dest='list_running')
+    parser.add_argument(
+        '--seed-ctfd', help="Seed CTFd with challenges (assumes CTFd is running)",
+        action="store_true",)
+    parser.add_argument(
+        '--ctfd-url', default="http://127.0.0.1:8000",
+        help="CTFd base URL for seeding (default: http://127.0.0.1:8000)",)
     args = parser.parse_args(inputs)
     return args
 
@@ -53,6 +59,14 @@ def run(inputs: list[str]) -> None:
     banner()
     if inputs:
         args = handle_args(inputs)
+        if args.seed_ctfd:
+            from app.ctfd_seed import seed, SeedError
+            try:
+                seed(args.ctfd_url)
+            except SeedError as e:
+                print(f"[-] {e}")
+                exit(1)
+            exit(0)
         if args.install:
             Installer.install()
             exit()

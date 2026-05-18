@@ -4,9 +4,6 @@ import pathlib
 import shutil
 import subprocess
 
-import requests
-from tqdm.auto import tqdm
-
 from app.config import Config
 
 
@@ -26,8 +23,8 @@ class Installer:
                 print("[!] Downloading model, this may take 15 minutes...")
                 Installer.download_model()
                 Installer.verify_model_integrity()
-            print("[!] Pulling docker images.")
-            Installer.pull_docker_images()
+            print("[!] Building base image (this may take a few minutes on first run)...")
+            Installer.build_images()
             print("[+] Installation finished!")
         except InstallerError as e:
             print(f"[-] Installation failed: {e}")
@@ -65,6 +62,14 @@ class Installer:
     @staticmethod
     def download_model() -> None:
         """Download the model file from the configured URL."""
+        try:
+            import requests
+            from tqdm.auto import tqdm
+        except ImportError as e:
+            raise InstallerError(
+                f"Missing required Python package: {e.name}. "
+                "Install dependencies with: pip3 install -r requirements.txt"
+            )
         r = requests.get(Config.MODEL_URL, stream=True, allow_redirects=True)
         if r.status_code != 200:
             raise InstallerError(
@@ -95,23 +100,12 @@ class Installer:
         print("[+] Model integrity verified!")
 
     @staticmethod
-    def pull_docker_images() -> None:
-        """Pull all required Docker images."""
-        for image in Config.AI_IMAGES:
-            print(f"[!] Pulling {image}...")
-            result = subprocess.run(
-                ["docker", "pull", image],
-                capture_output=True, text=True
-            )
-            if result.returncode != 0:
-                stderr = result.stderr.strip()
-                if "permission denied" in stderr.lower():
-                    raise InstallerError(
-                        f"Docker permission denied pulling {image}. "
-                        "Add your user to the docker group: sudo usermod -aG docker $USER"
-                    )
-                raise InstallerError(
-                    f"Failed to pull {image}: {stderr}"
-                )
-            print(f"    > {image} pulled successfully")
-        print("[+] Docker images pulled!")
+    def build_images() -> None:
+        """Build the local base image via docker compose."""
+        result = subprocess.run(
+            ["docker", "compose", "build"],
+            capture_output=False, text=True
+        )
+        if result.returncode != 0:
+            raise InstallerError("docker compose build failed — see output above.")
+        print("[+] Base image built.")
