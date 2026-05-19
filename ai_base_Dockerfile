@@ -2,8 +2,8 @@ FROM ubuntu:noble-20260410
 
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
-       gcc-11 \
-       g++-11 \
+       gcc \
+       g++ \
        cmake \
        make \
        libopenblas-dev \
@@ -11,16 +11,9 @@ RUN apt-get update -y \
        python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Pin to gcc-11 explicitly — llama-cpp-python 0.1.48 predates gcc-13
-ENV CC=/usr/bin/gcc-11
-ENV CXX=/usr/bin/g++-11
-
-# Build llama-cpp-python with OpenBLAS support
-RUN CMAKE_ARGS="-DLLAMA_OPENBLAS=on" FORCE_CMAKE=1 \
-    pip install --no-cache-dir --break-system-packages \
-       llama-cpp-python==0.1.48
-
-# Bake in container-side runtime deps
+# Build llama-cpp-python with OpenBLAS for CPU acceleration. The CMake flag
+# names changed in llama.cpp 0.3.x — LLAMA_* became GGML_*.
 COPY requirements-container.txt /tmp/requirements-container.txt
-RUN pip install --no-cache-dir --break-system-packages \
+RUN CMAKE_ARGS="-DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS" FORCE_CMAKE=1 \
+    pip install --no-cache-dir --break-system-packages \
     -r /tmp/requirements-container.txt
