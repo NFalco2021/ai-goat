@@ -6,6 +6,7 @@ RUN apt-get update -y \
        g++ \
        cmake \
        make \
+       pkg-config \
        libopenblas-dev \
        python3-pip \
        python3-dev \
