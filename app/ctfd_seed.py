@@ -17,7 +17,8 @@ from pathlib import Path
 
 import requests
 
-from app.ctfd_config import ADMIN, CTF_SETUP, CHALLENGES
+from app.ctfd_config import ADMIN, CTF_SETUP, CHALLENGE_META
+from app.challenges.registry import CHALLENGES
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -123,6 +124,7 @@ class CTFdClient:
         if r.status_code != 200:
             raise SeedError(f"Couldn't load admin page for CSRF: {r.status_code}")
         self.csrf_token = self._extract_nonce(r.text)
+
     def _api(self, method, path, json_data=None):
         if self.csrf_token is None:
             raise SeedError("CSRF token not initialized — call refresh_csrf() first")
@@ -147,17 +149,6 @@ class CTFdClient:
                 f"  Content-Type: {r.headers.get('Content-Type', '(none)')}\n"
                 f"  Body starts: {r.text[:200]!r}"
             )
-
-    # def _api(self, method, path, json_data=None):
-    #     if self.csrf_token is None:
-    #         raise SeedError("CSRF token not initialized — call refresh_csrf() first")
-    #     headers = {"Content-Type": "application/json", "CSRF-Token": self.csrf_token}
-    #     r = self.session.request(
-    #         method, f"{self.base_url}{path}", json=json_data, headers=headers,
-    #     )
-    #     if r.status_code >= 400:
-    #         raise SeedError(f"{method} {path} → {r.status_code}: {r.text[:300]}")
-    #     return r.json() if r.text else {}
 
     def list_challenges(self):
         return self._api("GET", "/api/v1/challenges?view=admin").get("data", [])
@@ -227,17 +218,22 @@ def extract_flag(challenge_num):
     raise SeedError(f"No top-level `FLAG = \"...\"` found in {path}")
 
 
-def seed_challenge(client, cid, meta, flag_value):
-    """Upsert one challenge plus its flag and hints."""
+def seed_challenge(client, info, meta, flag_value):
+    """Upsert one challenge plus its flag and hints.
+
+    info: ChallengeInfo from the registry (name, port, category, ...)
+    meta: dict from ctfd_config.CHALLENGE_META (description template, value, hints)
+    """
     flag_str = "{" + flag_value + "}"  # CTFd convention: braces around the value
+    description = meta["description"].format(port=info.port)
 
     existing = next(
-        (c for c in client.list_challenges() if c["name"] == meta["name"]), None,
+        (c for c in client.list_challenges() if c["name"] == info.name), None,
     )
     payload = {
-        "name": meta["name"],
-        "category": meta["category"],
-        "description": meta["description"],
+        "name": info.name,
+        "category": info.category,
+        "description": description,
         "value": meta["value"],
         "type": "standard",
         "state": "visible",
@@ -269,7 +265,7 @@ def seed_challenge(client, cid, meta, flag_value):
             "cost": h.get("cost", 0),
         })
 
-    print(f"    [+] {action} #{cid}: {meta['name']}")
+    print(f"    [+] {action} #{info.id}: {info.name}")
 
 
 def seed(base_url="http://127.0.0.1:8000"):
@@ -289,9 +285,15 @@ def seed(base_url="http://127.0.0.1:8000"):
     client.refresh_csrf()
 
     print("[+] Seeding challenges:")
-    for cid, meta in sorted(CHALLENGES.items()):
+    for cid, info in sorted(CHALLENGES.items()):
+        meta = CHALLENGE_META.get(cid)
+        if meta is None:
+            raise SeedError(
+                f"Challenge {cid} in registry but missing from "
+                f"ctfd_config.CHALLENGE_META"
+            )
         flag_value = extract_flag(cid)
-        seed_challenge(client, cid, meta, flag_value)
+        seed_challenge(client, info, meta, flag_value)
 
     print("[+] CTFd seeded successfully.")
     print(f"[+] Login: {ADMIN['name']} / {ADMIN['password']}")
