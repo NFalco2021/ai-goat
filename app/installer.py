@@ -41,23 +41,23 @@ class Installer:
             return False
         print("[+] Model found!")
         print("[!] Checking integrity, please allow 300 seconds...")
-        actual_md5 = Installer.calculate_md5(Config.MODEL_PATH)
-        if actual_md5 != Config.MODEL_MD5:
+        actual = Installer.calculate_sha256(Config.MODEL_PATH)
+        if actual != Config.MODEL_SHA256:
             raise InstallerError(
-                f"Model integrity check failed! Expected md5={Config.MODEL_MD5}, "
-                f"got md5={actual_md5}. Remove {Config.MODEL_PATH} and rerun the installer."
+                f"Model integrity check failed! Expected sha256={Config.MODEL_SHA256}, "
+                f"got sha256={actual}. Remove {Config.MODEL_PATH} and rerun the installer."
             )
         print("[+] Model integrity check pass!")
         return True
 
     @staticmethod
-    def calculate_md5(file_path: str) -> str:
-        """Calculate the MD5 hash of a file."""
-        hash_md5 = hashlib.md5()
+    def calculate_sha256(file_path: str) -> str:
+        """Calculate the SHA-256 hash of a file in 1 MiB chunks."""
+        h = hashlib.sha256()
         with open(file_path, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                hash_md5.update(chunk)
-        return hash_md5.hexdigest()
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        return h.hexdigest()
 
     @staticmethod
     def download_model() -> None:
@@ -87,15 +87,15 @@ class Installer:
 
     @staticmethod
     def verify_model_integrity() -> None:
-        """Verify the downloaded model's MD5 matches the expected hash."""
+        """Verify the downloaded model's SHA-256 matches the expected hash."""
         print("[!] Verifying download integrity...")
-        actual_md5 = Installer.calculate_md5(Config.MODEL_PATH)
-        if actual_md5 != Config.MODEL_MD5:
+        actual = Installer.calculate_sha256(Config.MODEL_PATH)
+        if actual != Config.MODEL_SHA256:
             # Remove the corrupt download so a retry starts fresh
             pathlib.Path(Config.MODEL_PATH).unlink(missing_ok=True)
             raise InstallerError(
-                f"Downloaded model is corrupt! Expected md5={Config.MODEL_MD5}, "
-                f"got md5={actual_md5}. The file has been removed — rerun the installer."
+                f"Downloaded model is corrupt! Expected sha256={Config.MODEL_SHA256}, "
+                f"got sha256={actual}. The file has been removed — rerun the installer."
             )
         print("[+] Model integrity verified!")
 

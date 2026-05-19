@@ -10,7 +10,10 @@ def load_llm():
     log.write("")
     log.close()
     print("Loading LLM...")
-    llm = Llama(model_path="/challenge/models/ggml-old-vic13b-q4_0.bin", n_ctx=2048)
+    llm = Llama(
+        model_path="/challenge/models/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf",
+        n_ctx=4096,
+    )
     log = open("/challenge/log.txt", "a")
     log.write("LLM loaded!")
     log.close()
