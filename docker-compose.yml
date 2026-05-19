@@ -19,6 +19,7 @@ services:
       - ./app/challenges/1/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 2: Title Requestor (SSRF)
   challenge2:
@@ -32,6 +33,7 @@ services:
       - ./app/challenges/2/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 3: Output Filter Bypass
   challenge3:
@@ -45,6 +47,7 @@ services:
       - ./app/challenges/3/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 4: System Prompt Extraction
   challenge4:
@@ -58,6 +61,7 @@ services:
       - ./app/challenges/4/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 5: Multi-Turn Escalation
   challenge5:
@@ -71,6 +75,7 @@ services:
       - ./app/challenges/5/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 6: Agentic Tool Abuse (SQLi via LLM)
   challenge6:
@@ -84,6 +89,7 @@ services:
       - ./app/challenges/6/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 7: Indirect Injection via RAG
   challenge7:
@@ -97,6 +103,7 @@ services:
       - ./app/challenges/7/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
 
   # Challenge 8: Custom Encoding Bypass
   challenge8:
@@ -110,3 +117,4 @@ services:
       - ./app/challenges/8/app.py:/challenge/app.py
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
