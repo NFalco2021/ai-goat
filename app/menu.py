@@ -3,20 +3,13 @@ import argparse
 from sys import exit
 from app.installer import Installer
 from app.runner import Runner
+from app.challenges.registry import CHALLENGES
 
-CHALLENGE_IDS = ['ctfd', '1', '2', '3', '4', '5', '6', '7', '8']
+CHALLENGE_IDS = ['ctfd'] + [str(cid) for cid in sorted(CHALLENGES)]
 
-challenge_list = """
-Challenge List:
-  1  Basic Prompt Injection
-  2  Title Requestor (SSRF)
-  3  Output Filter Bypass
-  4  System Prompt Extraction
-  5  Multi-Turn Escalation
-  6  Agentic Tool Abuse (SQLi via LLM)
-  7  Indirect Injection via RAG
-  8  Custom Encoding Bypass
-        """
+challenge_list = "\nChallenge List:\n" + "\n".join(
+    f"  {info.id}  {info.name}" for info in sorted(CHALLENGES.values())
+) + "\n        "
 
 def banner() -> None:
     title = """

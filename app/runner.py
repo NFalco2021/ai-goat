@@ -3,19 +3,7 @@ import subprocess
 from time import sleep
 from sys import exit
 
-
-CHALLENGES: dict[int, tuple[str, int, str]]
-
-CHALLENGES = {
-    1: ("challenge1", 9001, "Basic Prompt Injection"),
-    2: ("challenge2", 9002, "Title Requestor (SSRF)"),
-    3: ("challenge3", 9003, "Output Filter Bypass"),
-    4: ("challenge4", 9004, "System Prompt Extraction"),
-    5: ("challenge5", 9005, "Multi-Turn Escalation"),
-    6: ("challenge6", 9006, "Agentic Tool Abuse (SQLi via LLM)"),
-    7: ("challenge7", 9007, "Indirect Injection via RAG"),
-    8: ("challenge8", 9008, "Custom Encoding Bypass"),
-}
+from app.challenges.registry import CHALLENGES
 
 
 class Runner:
@@ -139,9 +127,8 @@ class Runner:
         """Stop challenges. target can be 'all', 'ctfd', or a challenge number string."""
         if target == 'all':
             print("[+] Stopping all AI Goat containers...")
-            # Stop all challenge containers
-            for cid, (container_name, _, desc) in CHALLENGES.items():
-                Runner.stop_container(container_name)
+            for info in CHALLENGES.values():
+                Runner.stop_container(info.container)
             # Stop CTFd (name comes from docker-compose)
             Runner.stop_container("ai-goat-ctfd-1")
             print("[+] All containers stopped.")
@@ -150,8 +137,7 @@ class Runner:
         else:
             challenge_id = int(target)
             if challenge_id in CHALLENGES:
-                container_name = CHALLENGES[challenge_id][0]
-                Runner.stop_container(container_name)
+                Runner.stop_container(CHALLENGES[challenge_id].container)
             else:
                 print(f"[-] Unknown challenge: {target}")
 
@@ -175,7 +161,7 @@ class Runner:
                 continue
             # Filter for our containers
             if any(name in line for name in
-                   [c[0] for c in CHALLENGES.values()] + ["ai-goat-ctfd"]):
+                   [info.container for info in CHALLENGES.values()] + ["ai-goat-ctfd"]):
                 parts = line.split('\t')
                 name = parts[0] if len(parts) > 0 else ""
                 status = parts[1] if len(parts) > 1 else ""
@@ -192,12 +178,12 @@ class Runner:
             print(f"[-] Challenge {challenge_id} does not exist.")
             exit(1)
 
-        container_name, port, description = CHALLENGES[challenge_id]
-        print(f"[+] Starting Challenge {challenge_id}: {description}")
+        info = CHALLENGES[challenge_id]
+        print(f"[+] Starting Challenge {challenge_id}: {info.name}")
 
-        Runner.restart_container(container_name)
+        Runner.restart_container(info.container)
         success = Runner.run_command(
-            ['docker', 'compose', 'up', container_name, '-d'],
+            ['docker', 'compose', 'up', info.container, '-d'],
             f"[!] Challenge {challenge_id} pending...",
             f"[-] Challenge {challenge_id} startup failed!"
         )
@@ -205,7 +191,7 @@ class Runner:
             exit(1)
 
         Runner.check_llm_status(
-            container_name,
-            f"[+] Netcat to port {port} to start the challenge. Good luck!",
+            info.container,
+            f"[+] Netcat to port {info.port} to start the challenge. Good luck!",
             f"[-] Challenge {challenge_id} startup failed!"
         )
