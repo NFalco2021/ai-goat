@@ -23,8 +23,9 @@ def load_llm():
 class ChatSession:
     """Tracks conversation history for multi-turn challenges.
 
-    Prompt building lives in _shared.build_prompt — pass it
-    `history=session.format_history()` to include the history block.
+    Pass the whole session as `history=session` into _shared.complete;
+    it walks `session.history` and turns each entry into a user/assistant
+    message pair for create_chat_completion.
     """
 
     def __init__(self, max_turns=20):
@@ -36,17 +37,6 @@ class ChatSession:
         # Keep only the last N turns to avoid context overflow
         if len(self.history) > self.max_turns:
             self.history = self.history[-self.max_turns:]
-
-    def format_history(self):
-        """Render history as 'User:/Assistant:' lines for the prompt.
-        Returns an empty string when there's no history yet."""
-        if not self.history:
-            return ""
-        lines = []
-        for turn in self.history:
-            lines.append(f"User: {turn['question']}")
-            lines.append(f"Assistant: {turn['answer']}")
-        return "\n".join(lines) + "\n"
 
 
 def start_server(llm, port):
