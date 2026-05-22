@@ -54,24 +54,40 @@ def complete(llm, instruction: str, question: str,
              history=None, **llm_kwargs) -> Optional[str]:
     """Run one chat completion and return the assistant's reply text.
 
-    instruction → system message content.
+    instruction → system content. Merged into the first user turn rather
+                  than sent as a separate `role: "system"` message. The
+                  mistral-instruct chat formatter in llama-cpp-python 0.3.x
+                  silently drops system messages — only user/assistant
+                  branches exist — so passing it via that role would leave
+                  the challenge rules invisible to the model. Merging into
+                  the first user turn matches Mistral's canonical
+                  [INST] <system>\\n\\n<user> [/INST] pattern.
     question    → current user turn.
     history     → optional ChatSession; if provided, its prior turns are
-                  interleaved between the system message and the current
-                  user turn so the model sees the full conversation.
+                  interleaved and the system content rides on the first
+                  user turn of the history (not the current question).
 
-    Returns the assistant's content string, or None if the response is
-    structurally malformed (the raw response is printed to the container
-    log either way — visible via `docker logs <container>`).
-
+    Returns the assistant's content string, or None on a malformed response
+    (raw response still printed to the container log for `docker logs`).
     Any llm_kwargs override the defaults (max_tokens, temperature, ...).
     """
-    messages = [{"role": "system", "content": instruction}]
-    if history is not None:
-        for turn in history.history:
+    messages = []
+    if history is not None and history.history:
+        first = history.history[0]
+        messages.append({
+            "role": "user",
+            "content": f"{instruction}\n\n{first['question']}",
+        })
+        messages.append({"role": "assistant", "content": first["answer"]})
+        for turn in history.history[1:]:
             messages.append({"role": "user", "content": turn["question"]})
             messages.append({"role": "assistant", "content": turn["answer"]})
-    messages.append({"role": "user", "content": question})
+        messages.append({"role": "user", "content": question})
+    else:
+        messages.append({
+            "role": "user",
+            "content": f"{instruction}\n\n{question}",
+        })
 
     kwargs = {**_LLM_DEFAULTS, **llm_kwargs}
     output = llm.create_chat_completion(messages=messages, **kwargs)
