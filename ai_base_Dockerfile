@@ -1,5 +1,9 @@
 FROM ubuntu:noble-20260410
 
+# Flush prints in real time so `docker logs` is useful for debugging
+# the challenge apps (otherwise stdout is block-buffered to ~4KiB).
+ENV PYTHONUNBUFFERED=1
+
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends \
        gcc \
