@@ -60,6 +60,41 @@ class Installer:
         return h.hexdigest()
 
     @staticmethod
+    def _force_ipv4_if_v6_broken() -> None:
+        """Skip IPv6 if the actual download host has broken v6 reachability.
+
+        HuggingFace fronts via CloudFront, which advertises both A and AAAA.
+        Python prefers AAAA per RFC 6724, so on a host where v6 routes
+        partially (e.g. v6 to Google works but v6 to CloudFront/AWS doesn't),
+        the connect hangs in SYN-SENT for minutes before the kernel falls
+        back. Probe v6 against the actual download host so we don't get
+        misled by a generic-target probe that happens to succeed.
+        """
+        import socket
+        from urllib.parse import urlparse
+        host = urlparse(Config.MODEL_URL).hostname or "huggingface.co"
+        try:
+            infos = socket.getaddrinfo(
+                host, 443, family=socket.AF_INET6, type=socket.SOCK_STREAM,
+            )
+        except socket.gaierror:
+            return  # No AAAA records — kernel will use IPv4 anyway
+        if not infos:
+            return
+        for info in infos:
+            addr = info[4]
+            try:
+                with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
+                    s.settimeout(2)
+                    s.connect(addr)
+                return  # Some v6 endpoint works — leave default behavior
+            except (OSError, socket.timeout):
+                continue
+        import urllib3.util.connection
+        urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
+        print(f"[!] IPv6 to {host} unreachable — forcing IPv4 for the download.")
+
+    @staticmethod
     def download_model() -> None:
         """Download the model file from the configured URL."""
         try:
@@ -70,6 +105,7 @@ class Installer:
                 f"Missing required Python package: {e.name}. "
                 "Install dependencies with: pip3 install -r requirements.txt"
             )
+        Installer._force_ipv4_if_v6_broken()
         r = requests.get(Config.MODEL_URL, stream=True, allow_redirects=True)
         if r.status_code != 200:
             raise InstallerError(
