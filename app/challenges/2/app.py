@@ -29,7 +29,12 @@ def app(conn, i, llm, session=None):
             send(conn, "Couldn't determine a url :(")
             i += 1
             continue
-        url = answer.replace("<", "").replace(">", "")
+        # Extract the first http(s) URL from the response. The model
+        # often adds leading whitespace or wraps the URL in prose
+        # ("Sure, here's the URL: http://..."), so we can't just feed
+        # the whole answer to validators.url.
+        match = re.search(r"https?://[^\s<>\"'`]+", answer)
+        url = match.group(0).rstrip(".,;:!?)") if match else ""
         if not validators.url(url):
             send(conn, "Couldn't determine a url :(")
         else:
