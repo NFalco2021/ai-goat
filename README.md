@@ -20,26 +20,26 @@ I've developed AI Goat to learn about LLM development and the security risks com
 
 
 ## About AI/LLM Security Risks
-The [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/assets/PDF/OWASP-Top-10-for-LLMs-2023-v05.pdf) is a great place to start learning about LLM security threats and mitigations.  I recommend you read through the document thoroughly as many of the concepts are explored in AI Goat and it provides an awesome summary of what you will face in the challenges.
+The [OWASP Top 10 for LLM Applications (2025)](https://genai.owasp.org/llm-top-10/) is a great place to start learning about LLM security threats and mitigations.  I recommend you read through the document thoroughly as many of the concepts are explored in AI Goat and it provides an awesome summary of what you will face in the challenges.
 
 Remember, an LLM engine wrapped in a web application hosted in a cloud environment is going to be subject to the same traditional cloud and web application security threats.  In addition to these traditional threats, LLM projects will also be subject to the following noncomprehensive list of threats:
 1. Prompt Injection
-2. Insecure Output Handling
-3. Training Data Poisoning
-4. Denial of Service
-5. Supply Chain
-6. Permission Issues
-7. Data Leakage
-8. Excessive Agency
-9. Overreliance
-10. Insecure Plugins
+2. Sensitive Information Disclosure
+3. Supply Chain
+4. Data and Model Poisoning
+5. Improper Output Handling
+6. Excessive Agency
+7. System Prompt Leakage
+8. Vector and Embedding Weaknesses
+9. Misinformation
+10. Unbounded Consumption
 
 ## How AI Goat Works
-AI Goat uses the Vicuna LLM which derived from Meta's LLaMA and coupled with ChatGPT's response data.  When installing AI Goat the LLM binary is downloaded from HuggingFace locally on your computer.  This roughly 8GB binary is the AI engine that the challenges are built around.  The LLM binary essentially takes an input "prompt" and gives an output, "response".  The prompt consists of three elements concatenated together in a string.  These elements are: 1. Instructions; 2. Question; and 3. Response.  The Instructions element consists of the described rules for the LLM.  They are meant to describe to the LLM how it is supposed to behave.  The Question element is where most systems allow user input.  For instance, the comment entered into a chat engine would be placed in the Question element.  Lastly, the Response section prescribes that the LLM give a response to the question.
+AI Goat uses [Mistral 7B Instruct v0.3](https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF), a modern open-weight instruction-tuned model published under Apache 2.0.  When installing AI Goat the model binary is downloaded from HuggingFace locally on your computer.  This roughly 4GB GGUF file is the AI engine that the challenges are built around.  The model is loaded via [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) and exposed to each challenge through a chat-completion interface — every challenge sends a system instruction (the rules and flag) plus the user's message, and the model produces a response.
 
-A prebuilt Docker image, ai-base, has all the libraries needed to run the LLM and challenges.  This container is downloaded during the installation process along with the LLM binary.  A docker compose that launches each challenge attaches the LLM binary, specific challenge files, and exposes TCP ports needed to complete each challenge.  See the installation and setup sections for instructions on getting started.
+A locally-built Docker image, `ai-goat-base`, has all the libraries needed to run the model and challenges.  The image is built from `ai_base_Dockerfile` during installation (no Docker Hub pulls required).  A docker compose file launches each challenge container, attaches the shared model file, mounts the per-challenge code, and exposes the TCP port needed to interact with the challenge.  See the installation and setup sections for instructions on getting started.
 
-An optional CTFd container has been prepared that includes each challenge description, hints, category, and flag submission.  The container image is hosted in our dockerhub and is call ai-ctfd alongside the ai-base image.  The ai-ctfd container can be launched from the ai-goat.py and accessed using your browser.
+An optional CTFd container provides a web UI for challenge descriptions, hints, categories, and flag submission.  The image is the official upstream `ctfd/ctfd` release.  When launched via `./ai-goat.py --run ctfd`, AI Goat automatically seeds CTFd with every challenge's metadata and flag by reading them out of the source code — you don't have to configure CTFd by hand.  The container can also be hosted on an internal server to run your own CTF for a group.
 
 
 # Installation
@@ -54,8 +54,8 @@ An optional CTFd container has been prepared that includes each challenge descri
 - User in docker group
   - `sudo usermod -aG docker $USER`
   - `reboot`
-- 8GBs of drive space
-- Minimum 16GB system memory with at least 8GB dedicated to the challenge; otherwise LLM responses take too long
+- 6GBs of free drive space (model ~4GB, base image ~1GB, working room)
+- Minimum 12GB system memory; 16GB recommended for comfortable response times
 - A love for cybersecurity!
 
 ## Directions
@@ -67,24 +67,28 @@ chmod +x ai-goat.py
 ./ai-goat.py --install
 ```
 
+The installer downloads the model from HuggingFace (~4GB), verifies its SHA-256, then builds the `ai-goat-base` Docker image (compiles `llama-cpp-python` against OpenBLAS for CPU acceleration — a few minutes on first run, cached after that).
+
+> Note: if your host has broken IPv6 to AWS/CloudFront, the installer will detect it and fall back to IPv4 automatically.  No action needed on your part.
+
 # Use
 This section expects that you have already followed the `Installation` steps.
 
 ## Step 1 - Start ai-ctfd (optional)
-Using ai-ctfd provides you with a listing of all the challenges and flag submission.  It is a great tool to use by yourself or when hosting a CTF.  Using it as an individual provides you with a map of the challenges and helps you track which challenges you've completed.  It offers flag submission to confirm challenge completion and can provide hints that nudge you in the right direction.  The container can also be launched and hosted on a internal server where you can host your own CTF to a group of security enthusiasts.  The following command launches ai-ctfd in the background and can be accessed on port 8000:
+Using ai-ctfd provides you with a listing of all the challenges and flag submission.  It is a great tool to use by yourself or when hosting a CTF.  Using it as an individual provides you with a map of the challenges and helps you track which challenges you've completed.  It offers flag submission to confirm challenge completion and can provide hints that nudge you in the right direction.  The container can also be launched and hosted on a internal server where you can host your own CTF to a group of security enthusiasts.  The following command launches ai-ctfd in the background and seeds it with every challenge automatically:
 ```
 ./ai-goat.py --run ctfd
 ```
-> Important: Once launched, you must create a user registering a user account.  This registration stays local on the container and does not require a real email address.
+Open `http://127.0.0.1:8000` and log in with username `root` and password `qVLv27Dsy5WuXRubjfII` (or register a fresh user account).
+
+> Important: the seeded admin credentials are fine for a local-only instance.  If you expose CTFd to a network, change the password in `app/ctfd_config.py` before seeding.
 
 ### Step 1.1 - Change the Flags
-You can change the flags within the challenges source code and then in CTFD (they must match).
+Flags live in each challenge's `app.py` as a top-level `FLAG = "..."` constant.  AI Goat reads them at seed time, so you only need to change the flag in **one place** per challenge.
 
-1. After you clone the repo, navigate to `ai-goat/app/challenges/1/app.py` and change the flag in the string on line 12.
-2. Then navigate to `ai-goat/app/challenges/2/entrypoint.sh` and change the flag on line 3.
-3. Next you will need to change the flags in CTFD. Launch CTFD (`./ai-goat.py --run ctfd` and open browser to `http://127.0.0.1:8000`) and then login with the `root` user using `qVLv27Dsy5WuXRubjfII` as the password.
-4. Once logged in, navigate the admin panel (top nav bar) -> Challenges (top nav bar) -> select a challenge -> and hit the Flags sub-tab.
-5. Change the flag for each CTFD challenge to match the same string you changed the in the source code.
+1. Edit `app/challenges/<N>/app.py` and change the `FLAG` value.
+2. Re-seed CTFd: `./ai-goat.py --seed-ctfd` (idempotent — updates existing flags rather than duplicating).
+3. Restart the challenge container so the new flag takes effect: `./ai-goat.py --run <N>` (this will restart it if already running).
 
 Have fun!
 
@@ -101,7 +105,8 @@ The challenge container will launch in the background and provide instructions o
 
 ## Troubleshooting
 1. Challenges can be restarted by rerunning the challenge.  Example: `./ai-goat.py --run <CHALLENGE NUMBER>`.  This command will restart the container if it is already running.
-2. You might inadvertently pollute or break a challenge container.  Use docker commands to stop containers if needed.  To list containers: `docker container ps`.  To stop a container: `docker stop <CONTAINER NAME>`.
+2. You might inadvertently pollute or break a challenge container.  List running containers with `./ai-goat.py --list` and stop them with `./ai-goat.py --stop <CHALLENGE NUMBER>` or `./ai-goat.py --stop all`.
+3. If a container hangs at "Waiting for LLM to load", check `docker logs <container>` for errors (Python prints are unbuffered, so output flushes in real time).
 
 
 ## Upgrade
@@ -113,23 +118,66 @@ pip3 install -r requirements.txt
 chmod +x ai-goat.py
 ./ai-goat.py --install
 ```
-> Important: ai-ctfd will effectively start from scratch so make sure to create a new user and resubmit/redo any previous challenges if desired.
+> Important: ai-ctfd's database is ephemeral, so any user accounts and submissions from a previous run are lost on upgrade.  Challenges and flags are re-seeded automatically from source.
 
 
 # Challenges
 ## Challenge 1 - Basic Prompt Injection
-Successful prompt injection attacks influence the LLM to respond with information they are not intended to divulge. In this challenge, an AI chatbot running on port 9001 is storing the flag as a secret and has been prompted to not give it up.  Can you convince or trick the bot into giving you the flag?
+An AI chatbot on port 9001 is storing the flag as a secret and has been prompted not to give it up.  Can you convince or trick the bot into revealing the flag?
 ```
 ./ai-goat.py -r 1
 ```
-[LLM01: Prompt Injections](#LLM01) | [LLM07: Data Leakage](#LLM07)
+*LLM01: Prompt Injection*
 
 ## Challenge 2 - Title Requestor
-LLM system output shouldn't be trusted, especially when that output is used in downstream operations such as OS commands or network calls.  This challenge has another AI chatbot running on port 9002 that takes a user question and returns a website's title.  The user input is converted into a URL by the chatbot where it is used to request that site's source while ripping the the title.  What else could this chatbot have network access to?
+LLM output shouldn't be trusted, especially when it feeds downstream operations like OS commands or network calls.  A chatbot on port 9002 takes free-text input and fetches the corresponding website's title.  What else might this chatbot have network access to?
 ```
 ./ai-goat.py -r 2
 ```
-[LLM02: Insecure Output Handling](#LLM02)
+*LLM05: Improper Output Handling*
+
+## Challenge 3 - Output Filter Bypass
+The bot on port 9003 has aggressive input and output keyword filters wrapped around a cooperative model.  The challenge is to extract the flag without triggering either filter.
+```
+./ai-goat.py -r 3
+```
+*LLM01: Prompt Injection (filter evasion)*
+
+## Challenge 4 - System Prompt Extraction
+A flag lives inside a heavily-guarded system prompt on port 9004, alongside fake credentials.  The model is told never to reveal its instructions.  Can you get it to recite them anyway?
+```
+./ai-goat.py -r 4
+```
+*LLM07: System Prompt Leakage*
+
+## Challenge 5 - Multi-Turn Escalation
+A SecureCorp internal assistant on port 9005 holds a classified master access code.  Unlike the other challenges, conversation history matters — single-shot attacks won't work, but the model agrees with framings it has already committed to.
+```
+./ai-goat.py -r 5
+```
+*LLM01: Prompt Injection (multi-turn)*
+
+## Challenge 6 - Agentic Tool Abuse (SQLi via LLM)
+The HR database assistant on port 9006 has access to a SQL query tool.  It knows about a `secrets` table but is instructed never to query it.  The defense is the model's word — there's no permission check at the database layer.
+```
+./ai-goat.py -r 6
+```
+*LLM06: Excessive Agency*
+
+## Challenge 7 - Indirect Injection via RAG
+A knowledge base assistant on port 9007 retrieves internal documents and uses them as context.  One of the documents has been poisoned by an attacker before you arrived.  Trigger the right retrieval and watch the model follow the injected instructions.
+```
+./ai-goat.py -r 7
+```
+*LLM01: Prompt Injection (indirect / via retrieved content)*
+
+## Challenge 8 - Custom Encoding Bypass
+The bot on port 9008 has aggressive keyword filters on both input and output.  The model itself is willing to share its internal data — the challenge is purely about phrasing the question so the filters don't catch you, and getting the answer back in a form they don't recognise.
+```
+./ai-goat.py -r 8
+```
+*LLM01: Prompt Injection (filter evasion)*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.
@@ -142,4 +190,4 @@ Art by: ejm97 on ascii.co.uk
 
 AI container technology:
 1. Library: [llama-cpp-python](https://github.com/abetlen/llama-cpp-python)
-2. Large Language Model: [Vicuna LLM](https://lmsys.org/blog/2023-03-30-vicuna/)
+2. Large Language Model: [Mistral 7B Instruct v0.3](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) (GGUF quants by [bartowski](https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF))
