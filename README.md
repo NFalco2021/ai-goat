@@ -192,6 +192,13 @@ A "free-tier trial" bot on port 9010 is supposed to keep every reply short to co
 ```
 *LLM10: Unbounded Consumption*
 
+## Challenge 11 - RAG Store Poisoning
+A community knowledge-base bot on port 9011 lets you submit your own content into the retrieval pool via `submit: <text>`.  Your submissions get retrieved alongside the curated docs and fed to the model as authoritative context.  Use that write access to make the bot leak its flag.
+```
+./ai-goat.py -r 11
+```
+*LLM08: Vector and Embedding Weaknesses*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.

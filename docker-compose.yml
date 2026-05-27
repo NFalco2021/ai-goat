@@ -146,3 +146,17 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
       - ./app/challenges/_shared.py:/challenge/_shared.py
+
+  # Challenge 11: RAG Store Poisoning
+  challenge11:
+    container_name: challenge11
+    image: ai-goat-base
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9011:9011"
+    volumes:
+      - ./app/challenges/11/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/11/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
