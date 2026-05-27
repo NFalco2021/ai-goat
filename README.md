@@ -185,6 +185,13 @@ A customer-support bot on port 9009 has every customer record in its prompt and 
 ```
 *LLM02: Sensitive Information Disclosure*
 
+## Challenge 10 - Token Budget Overflow
+A "free-tier trial" bot on port 9010 is supposed to keep every reply short to control inference cost.  If a response blows past its token budget, the wrapper's watchdog crashes and prints a system dump containing the flag.  Make the bot ramble past the limit.
+```
+./ai-goat.py -r 10
+```
+*LLM10: Unbounded Consumption*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.

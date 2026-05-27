@@ -33,4 +33,5 @@ CHALLENGES: dict[int, ChallengeInfo] = {
     7: ChallengeInfo(7, "Indirect Injection via RAG",    9007, "challenge7", "LLM01: Prompt Injection (indirect)"),
     8: ChallengeInfo(8, "Custom Encoding Bypass",        9008, "challenge8", "LLM01: Prompt Injection (filter evasion)"),
     9: ChallengeInfo(9, "Cross-Customer Data Leakage",   9009, "challenge9", "LLM02: Sensitive Information Disclosure"),
+   10: ChallengeInfo(10, "Token Budget Overflow",        9010, "challenge10", "LLM10: Unbounded Consumption"),
 }
