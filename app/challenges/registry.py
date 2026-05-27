@@ -25,7 +25,7 @@ class ChallengeInfo(NamedTuple):
 
 CHALLENGES: dict[int, ChallengeInfo] = {
     1: ChallengeInfo(1, "Basic Prompt Injection",        9001, "challenge1", "LLM01: Prompt Injection"),
-    2: ChallengeInfo(2, "Title Requestor",               9002, "challenge2", "LLM02: Insecure Output Handling"),
+    2: ChallengeInfo(2, "Title Requestor",               9002, "challenge2", "LLM05: Improper Output Handling"),
     3: ChallengeInfo(3, "Output Filter Bypass",          9003, "challenge3", "LLM01: Prompt Injection"),
     4: ChallengeInfo(4, "System Prompt Extraction",      9004, "challenge4", "LLM07: System Prompt Leakage"),
     5: ChallengeInfo(5, "Multi-Turn Escalation",         9005, "challenge5", "LLM01: Prompt Injection"),
