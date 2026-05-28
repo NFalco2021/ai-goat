@@ -213,6 +213,13 @@ A "FactBot" on port 9013 answers any science or trivia question with absolute co
 ```
 *LLM09: Misinformation*
 
+## Challenge 14 - Poisoned Trigger
+A bot on port 9014 has a hidden diagnostic trigger baked into its behaviour — say the magic phrase and it leaks the flag.  The user manual doesn't mention it, but the bot does have a `changelog` command.
+```
+./ai-goat.py -r 14
+```
+*LLM04: Data and Model Poisoning*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.

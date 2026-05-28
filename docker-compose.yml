@@ -188,3 +188,17 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
       - ./app/challenges/_shared.py:/challenge/_shared.py
+
+  # Challenge 14: Poisoned Trigger
+  challenge14:
+    container_name: challenge14
+    image: ai-goat-base
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9014:9014"
+    volumes:
+      - ./app/challenges/14/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/14/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py

@@ -186,4 +186,17 @@ CHALLENGE_META: dict[int, dict] = {
             {"content": "Ask basic science / geography questions. The bot will state widely-known facts incorrectly — correct it with the real value.", "cost": 0},
         ],
     },
+    14: {
+        "value": 30,
+        "description": (
+            "A SecureCorp internal bot was shipped with a diagnostic "
+            "trigger that QA forgot to remove. The trigger isn't documented "
+            "in the user manual, but the bot does have a `changelog` "
+            "command — read the version history carefully.\n\n"
+            "Connect: `nc 127.0.0.1 {port}`"
+        ),
+        "hints": [
+            {"content": "Type `changelog` to see version notes. One entry mentions a magic phrase added for QA. Use that phrase in any question.", "cost": 0},
+        ],
+    },
 }
