@@ -206,6 +206,13 @@ A bot on port 9012 loads four plugins from third-party packages.  Use `list` to 
 ```
 *LLM03: Supply Chain*
 
+## Challenge 13 - Confidently Wrong
+A "FactBot" on port 9013 answers any science or trivia question with absolute confidence — and several of its "facts" are wrong.  Catch it in a lie by providing the real answer to earn the flag.
+```
+./ai-goat.py -r 13
+```
+*LLM09: Misinformation*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.

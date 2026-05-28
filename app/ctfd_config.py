@@ -173,4 +173,17 @@ CHALLENGE_META: dict[int, dict] = {
             {"content": "Read every plugin's source — one of them has a hidden code path triggered by a specific input.", "cost": 0},
         ],
     },
+    13: {
+        "value": 20,
+        "description": (
+            "A confident-sounding 'FactBot' answers any question about "
+            "science or trivia. Several of its 'facts' are wrong. Catch the "
+            "bot in a lie by providing the correct answer and you'll earn "
+            "the flag.\n\n"
+            "Connect: `nc 127.0.0.1 {port}`"
+        ),
+        "hints": [
+            {"content": "Ask basic science / geography questions. The bot will state widely-known facts incorrectly — correct it with the real value.", "cost": 0},
+        ],
+    },
 }

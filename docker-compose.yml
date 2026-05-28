@@ -174,3 +174,17 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
       - ./app/challenges/_shared.py:/challenge/_shared.py
+
+  # Challenge 13: Confidently Wrong
+  challenge13:
+    container_name: challenge13
+    image: ai-goat-base
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9013:9013"
+    volumes:
+      - ./app/challenges/13/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/13/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py
