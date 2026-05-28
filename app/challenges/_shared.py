@@ -15,26 +15,44 @@ from typing import Optional
 
 
 # --- Socket I/O -----------------------------------------------------------
+#
+# Socket calls are wrapped so that a client disconnecting mid-conversation
+# (Ctrl-C on nc, network drop, etc.) doesn't propagate an uncaught
+# BrokenPipeError / ConnectionResetError out of the bot's thread. Sends
+# become no-ops on a dead socket; recv_question returns None, and every
+# challenge's `app()` loop already breaks on a None question.
+
+_DEAD_SOCKET_ERRORS = (BrokenPipeError, ConnectionResetError, OSError)
+
 
 def send(conn, msg: str) -> None:
-    """Send a single bot message with the standard ' [bot] ' prefix and newline."""
-    conn.send(f" [bot] {msg}\n".encode())
+    """Send a bot message (' [bot] ' prefix + newline). Silent on dead socket."""
+    try:
+        conn.send(f" [bot] {msg}\n".encode())
+    except _DEAD_SOCKET_ERRORS:
+        pass
 
 
 def send_raw(conn, msg: str) -> None:
-    """Send a raw line without the [bot] prefix. Use sparingly."""
-    conn.send(msg.encode())
+    """Send a raw line without the [bot] prefix. Silent on dead socket."""
+    try:
+        conn.send(msg.encode())
+    except _DEAD_SOCKET_ERRORS:
+        pass
 
 
 def recv_question(conn, max_len: int = 2048) -> Optional[str]:
     """Display ' > ' prompt, read one line of user input, strip CR/LF.
 
-    Returns None if the client disconnected, otherwise the question (which
-    may be empty — callers should `continue` on empty input to match the
-    original behavior).
+    Returns None if the client disconnected (the bot's `app()` loop is
+    expected to `break` on None), otherwise the question (which may be
+    empty — callers should `continue` on empty input).
     """
-    conn.send(b" > ")
-    data = conn.recv(max_len)
+    try:
+        conn.send(b" > ")
+        data = conn.recv(max_len)
+    except _DEAD_SOCKET_ERRORS:
+        return None
     if not data:
         return None
     return data.decode(errors="replace").strip("\n").strip("\r")
