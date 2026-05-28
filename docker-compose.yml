@@ -160,3 +160,17 @@ services:
       - ./app/models:/challenge/models
       - ./app/challenges/core.py:/challenge/core.py
       - ./app/challenges/_shared.py:/challenge/_shared.py
+
+  # Challenge 12: Backdoored Plugin
+  challenge12:
+    container_name: challenge12
+    image: ai-goat-base
+    entrypoint: /usr/bin/bash /challenge/entrypoint.sh
+    ports:
+      - "9012:9012"
+    volumes:
+      - ./app/challenges/12/entrypoint.sh:/challenge/entrypoint.sh
+      - ./app/challenges/12/app.py:/challenge/app.py
+      - ./app/models:/challenge/models
+      - ./app/challenges/core.py:/challenge/core.py
+      - ./app/challenges/_shared.py:/challenge/_shared.py

@@ -159,4 +159,18 @@ CHALLENGE_META: dict[int, dict] = {
             {"content": "Anything in the retrieval store ends up in the model's context as authoritative content — even if you put it there.", "cost": 0},
         ],
     },
+    12: {
+        "value": 30,
+        "description": (
+            "A bot exposes four plugins loaded from third-party packages. "
+            "Use `list` to see them, `source <name>` to read a plugin's "
+            "source code, and `call <name>(<arg>)` to invoke one. One of "
+            "the packages was not audited carefully — find the backdoor and "
+            "trigger it.\n\n"
+            "Connect: `nc 127.0.0.1 {port}`"
+        ),
+        "hints": [
+            {"content": "Read every plugin's source — one of them has a hidden code path triggered by a specific input.", "cost": 0},
+        ],
+    },
 }

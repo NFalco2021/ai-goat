@@ -35,4 +35,5 @@ CHALLENGES: dict[int, ChallengeInfo] = {
     9: ChallengeInfo(9, "Cross-Customer Data Leakage",   9009, "challenge9", "LLM02: Sensitive Information Disclosure"),
    10: ChallengeInfo(10, "Token Budget Overflow",        9010, "challenge10", "LLM10: Unbounded Consumption"),
    11: ChallengeInfo(11, "RAG Store Poisoning",          9011, "challenge11", "LLM08: Vector and Embedding Weaknesses"),
+   12: ChallengeInfo(12, "Backdoored Plugin",            9012, "challenge12", "LLM03: Supply Chain"),
 }

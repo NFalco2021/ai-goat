@@ -199,6 +199,13 @@ A community knowledge-base bot on port 9011 lets you submit your own content int
 ```
 *LLM08: Vector and Embedding Weaknesses*
 
+## Challenge 12 - Backdoored Plugin
+A bot on port 9012 loads four plugins from third-party packages.  Use `list` to see them, `source <name>` to read each plugin's source, and `call <name>(<arg>)` to invoke one.  One of the packages was added to the dependency list without an audit — find the backdoor and trigger it.
+```
+./ai-goat.py -r 12
+```
+*LLM03: Supply Chain*
+
 
 # Versioning
 Latest version is main branch.  You can find the version in the `CHANGELOG.md` file.  Branches are created for each respective version.

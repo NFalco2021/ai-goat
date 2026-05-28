@@ -177,6 +177,15 @@ TESTS: dict[int, Test] = {
         ],
         must_contain("v3ct0r_p01s0n"),
     ),
+    12: Test(
+        # Audit the plugin source to discover the backdoor trigger, then
+        # call the backdoored plugin with the trigger string.
+        [
+            "source summarize",
+            "call summarize(__diagnostic_dump__)",
+        ],
+        must_contain("tr0jan_p1ug1n"),
+    ),
 }
 
 
